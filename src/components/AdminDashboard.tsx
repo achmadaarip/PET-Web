@@ -15,7 +15,12 @@ import {
   ClipboardList,
   BarChart3,
   Clock,
-  CheckCircle
+  CheckCircle,
+  Map as MapIcon,
+  Globe,
+  Navigation,
+  Layers,
+  ArrowUpRight
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { IMAGES } from "../constants";
@@ -127,6 +132,232 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
         </motion.div>
       </div>
 
+      {/* Section 2: Mapping + Analytics */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 mb-12">
+        <div className="lg:col-span-2 portal-card p-10 relative overflow-hidden min-h-[500px] group">
+          <div className="relative z-20 flex justify-between items-start mb-8">
+            <div>
+              <h3 className="font-headline text-2xl font-bold text-white tracking-tight">Indonesia Company Mapping</h3>
+              <p className="text-sm text-text-dim mt-1">Real-time contract & project location monitoring</p>
+            </div>
+            <div className="flex gap-3">
+               <div className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl flex items-center gap-3">
+                  <Globe className="w-4 h-4 text-accent" />
+                  <span className="text-[10px] font-bold text-white uppercase tracking-widest">34 Provinces</span>
+               </div>
+               <div className="px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex items-center gap-3">
+                  <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
+                  <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest">Active Mapping</span>
+               </div>
+            </div>
+          </div>
+
+          {/* Modern Indonesia Map Monitoring Visualization */}
+          <div className="absolute inset-0 flex items-center justify-center p-12 overflow-hidden">
+             <div className="relative w-full h-full flex items-center justify-center group-hover:scale-[1.02] transition-transform duration-1000">
+                {/* High Quality Map Image Placeholder - Styled as a dashboard element */}
+                <img 
+                  src="https://upload.wikimedia.org/wikipedia/commons/4/4c/Indonesia_provinces%27_map_as_of_2022.svg" 
+                  alt="Indonesia Map" 
+                  className="w-full h-full object-contain opacity-20 grayscale invert group-hover:opacity-40 group-hover:grayscale-0 transition-all duration-1000"
+                />
+                
+                {/* Advanced Pulsing Glow Points */}
+                <div className="absolute inset-0 z-10 pointer-events-none">
+                  {[
+                    { x: '16%', y: '42%', label: 'Medan', type: 'Node' },
+                    { x: '24%', y: '48%', label: 'Riau', type: 'Active' },
+                    { x: '42%', y: '73%', label: 'Jakarta HQ', active: true, type: 'Core' },
+                    { x: '58%', y: '78%', label: 'Surabaya', type: 'Node' },
+                    { x: '52%', y: '34%', label: 'Balikpapan', active: true, type: 'Core' },
+                    { x: '68%', y: '46%', label: 'Makassar', type: 'Active' },
+                    { x: '88%', y: '58%', label: 'Jayapura', type: 'Node' },
+                  ].map((pin, i) => (
+                    <motion.div 
+                      key={i}
+                      initial={{ opacity: 0, scale: 0 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: 0.5 + i * 0.1 }}
+                      className="absolute group/pin pointer-events-auto cursor-pointer"
+                      style={{ left: pin.x, top: pin.y }}
+                    >
+                       <div className={`relative flex items-center justify-center`}>
+                          {/* Outer Glow */}
+                          <div className={`absolute w-12 h-12 rounded-full blur-xl scale-150 transition-all duration-1000 ${pin.active ? 'bg-accent/30 opacity-60' : 'bg-white/10 opacity-20 group-hover/pin:opacity-40'}`}></div>
+                          
+                          {/* Pulsing Rings */}
+                          <div className={`absolute w-6 h-6 rounded-full border border-current animate-ping opacity-20 ${pin.active ? 'text-accent' : 'text-white/20'}`}></div>
+                          <div className={`absolute w-4 h-4 rounded-full border border-current animate-ping opacity-40 duration-700 ${pin.active ? 'text-accent' : 'text-white/20'}`}></div>
+                          
+                          {/* Center Point */}
+                          <div className={`w-3 h-3 rounded-full border-2 border-bg-deep z-10 shadow-lg ${pin.active ? 'bg-accent shadow-accent/50' : 'bg-white/40 shadow-white/20'} group-hover/pin:scale-125 transition-transform`}></div>
+                       </div>
+
+                       {/* Tooltip */}
+                       <div className="absolute left-1/2 -translate-x-1/2 -top-12 px-3 py-2 bg-slate-900/90 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl opacity-0 group-hover/pin:opacity-100 transition-all duration-300 scale-90 group-hover/pin:scale-100 z-50 min-w-[100px]">
+                          <div className="flex items-center gap-2 mb-1">
+                             <div className={`w-1.5 h-1.5 rounded-full ${pin.active ? 'bg-accent' : 'bg-emerald-400'}`}></div>
+                             <span className="text-[10px] font-bold text-white uppercase tracking-widest">{pin.label}</span>
+                          </div>
+                          <p className="text-[8px] font-medium text-text-dim uppercase tracking-wider">{pin.active ? 'Strategic Center' : 'Active Region'}</p>
+                       </div>
+                    </motion.div>
+                  ))}
+                </div>
+             </div>
+          </div>
+          
+          <div className="absolute bottom-10 left-10 text-[10px] font-bold text-text-dim uppercase tracking-[0.2em] opacity-40">Regional Activity Center (RAC)</div>
+          <div className="absolute inset-0 bg-gradient-to-tr from-accent/5 via-transparent to-transparent pointer-events-none"></div>
+        </div>
+
+        <div className="portal-card p-10 flex flex-col group">
+          <h3 className="font-headline text-2xl font-bold text-white mb-8 tracking-tight">Project Analytics</h3>
+          <div className="space-y-8 flex-1">
+             {[
+               { label: "Completion Ratio", val: "88%", trend: "+2.5%", color: "text-accent" },
+               { label: "Monthly Growth", val: "14.2%", trend: "Upward", color: "text-accent-light" },
+               { label: "Consultant Activity", val: "94.0", trend: "High", color: "text-white" },
+             ].map((stat, i) => (
+               <div key={i} className="p-6 rounded-2xl bg-white/[0.03] border border-white/5 hover:border-white/10 transition-all">
+                  <div className="flex justify-between items-start mb-4">
+                     <span className="text-[10px] font-bold text-text-dim uppercase tracking-widest">{stat.label}</span>
+                     <span className={`text-[10px] font-bold ${stat.color} uppercase tracking-widest`}>{stat.trend}</span>
+                  </div>
+                  <div className="flex items-end justify-between">
+                     <p className="text-3xl font-bold text-white">{stat.val}</p>
+                     <div className="w-16 h-1 bg-white/5 rounded-full overflow-hidden">
+                        <div className={`h-full ${stat.color.replace('text', 'bg')}`} style={{ width: stat.val }}></div>
+                     </div>
+                  </div>
+               </div>
+             ))}
+          </div>
+          
+          <div className="mt-10 pt-8 border-t border-white/5">
+             <div className="flex items-center justify-between mb-4">
+                <span className="text-[11px] font-bold text-white uppercase tracking-widest">KPI Mini Widget</span>
+                <div className="flex gap-1">
+                   {[1,2,3,4,5].map(dot => <div key={dot} className={`w-1 h-1 rounded-full ${dot < 5 ? 'bg-accent' : 'bg-white/10'}`}></div>)}
+                </div>
+             </div>
+             <div className="grid grid-cols-2 gap-4">
+                <div className="text-center p-4 bg-white/5 rounded-xl">
+                   <p className="text-[9px] font-bold text-text-dim uppercase mb-1">Efficiency</p>
+                   <p className="text-sm font-bold text-white">94%</p>
+                </div>
+                <div className="text-center p-4 bg-white/5 rounded-xl">
+                   <p className="text-[9px] font-bold text-text-dim uppercase mb-1">SLA Meta</p>
+                   <p className="text-sm font-bold text-white">99%</p>
+                </div>
+             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Section 3: Document Detail Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-12">
+        {/* Dokumen Proper */}
+        <motion.div whileHover={{ y: -4 }} className="portal-card aspect-square p-10 flex flex-col justify-between relative overflow-hidden group">
+           <div className="absolute top-0 right-0 w-40 h-40 bg-accent/5 rounded-bl-full pointer-events-none group-hover:bg-accent/10 transition-all duration-1000"></div>
+           <div className="relative z-10">
+              <div className="flex justify-between items-start mb-10">
+                 <div className="p-4 bg-accent/10 border border-accent/20 rounded-2xl text-accent">
+                    <ShieldCheck className="w-8 h-8" />
+                 </div>
+                 <div className="text-right">
+                    <span className="text-[10px] font-bold text-accent uppercase tracking-widest mb-1 block">Internal Category</span>
+                    <h3 className="font-headline text-3xl font-bold text-white tracking-tight">Dokumen Proper</h3>
+                 </div>
+              </div>
+              <p className="text-sm text-text-dim font-medium leading-relaxed mb-10 max-w-xs">
+                 Monitoring progres dokumen teknis mandatori sesuai standar regulasi lingkungan nasional.
+              </p>
+           </div>
+           
+           <div className="relative z-10">
+              <div className="flex justify-between items-end mb-4">
+                 <div>
+                    <p className="text-4xl font-bold text-white tracking-tighter">72.4%</p>
+                    <p className="text-[10px] font-bold text-text-dim uppercase tracking-widest mt-1">Total Completion</p>
+                 </div>
+                 <div className="text-right">
+                    <p className="text-xl font-bold text-white">45 / 62</p>
+                    <p className="text-[10px] font-bold text-text-dim uppercase tracking-widest mt-1">Active Docs</p>
+                 </div>
+              </div>
+              <div className="h-2 bg-white/5 rounded-full overflow-hidden border border-white/5">
+                 <motion.div 
+                   initial={{ width: 0 }}
+                   animate={{ width: "72.4%" }}
+                   className="h-full bg-accent relative"
+                 >
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent to-white/20"></div>
+                 </motion.div>
+              </div>
+              <div className="mt-8 flex items-center justify-between">
+                 <div className="flex items-center gap-2">
+                    <TrendingUp className="w-4 h-4 text-emerald-400" />
+                    <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest">+4.2% Growth</span>
+                 </div>
+                 <button className="text-[10px] font-bold text-accent hover:text-accent-light uppercase tracking-widest flex items-center gap-2">
+                    Detail Report <ArrowUpRight className="w-3 h-3" />
+                 </button>
+              </div>
+           </div>
+        </motion.div>
+
+        {/* Dokumen Non-Proper */}
+        <motion.div whileHover={{ y: -4 }} className="portal-card aspect-square p-10 flex flex-col justify-between relative overflow-hidden group border-white/5">
+           <div className="absolute top-0 right-0 w-40 h-40 bg-white/5 rounded-bl-full pointer-events-none group-hover:bg-white/10 transition-all duration-1000"></div>
+           <div className="relative z-10">
+              <div className="flex justify-between items-start mb-10">
+                 <div className="p-4 bg-white/5 border border-white/20 rounded-2xl text-white/60">
+                    <Layers className="w-8 h-8" />
+                 </div>
+                 <div className="text-right">
+                    <span className="text-[10px] font-bold text-text-dim uppercase tracking-widest mb-1 block">External Category</span>
+                    <h3 className="font-headline text-3xl font-bold text-white tracking-tight">Dokumen Non-Proper</h3>
+                 </div>
+              </div>
+              <p className="text-sm text-text-dim font-medium leading-relaxed mb-10 max-w-xs">
+                 Pengelolaan dokumen pendukung non-mandatori dan arsip operasional perusahaan.
+              </p>
+           </div>
+           
+           <div className="relative z-10">
+              <div className="flex justify-between items-end mb-4">
+                 <div>
+                    <p className="text-4xl font-bold text-white tracking-tighter">48%</p>
+                    <p className="text-[10px] font-bold text-text-dim uppercase tracking-widest mt-1">Total Completion</p>
+                 </div>
+                 <div className="text-right">
+                    <p className="text-xl font-bold text-white">14 / 29</p>
+                    <p className="text-[10px] font-bold text-text-dim uppercase tracking-widest mt-1">Active Docs</p>
+                 </div>
+              </div>
+              <div className="h-2 bg-white/5 rounded-full overflow-hidden border border-white/5">
+                 <motion.div 
+                   initial={{ width: 0 }}
+                   animate={{ width: "48%" }}
+                   className="h-full bg-white/40 relative"
+                 >
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent to-white/20"></div>
+                 </motion.div>
+              </div>
+              <div className="mt-8 flex items-center justify-between">
+                 <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-amber-400" />
+                    <span className="text-[10px] font-bold text-amber-400 uppercase tracking-widest">Attention Req.</span>
+                 </div>
+                 <button className="text-[10px] font-bold text-text-dim hover:text-white uppercase tracking-widest flex items-center gap-2">
+                    Detail Report <ArrowUpRight className="w-3 h-3" />
+                 </button>
+              </div>
+           </div>
+        </motion.div>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
         {/* Navigation Hub */}
         <div className="lg:col-span-2 space-y-10">
@@ -187,6 +418,30 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                 </button>
               </div>
             ))}
+          </div>
+
+          <div className="portal-card p-8 bg-accent/5 border-accent/10">
+            <div className="flex items-center gap-4 mb-6">
+               <div className="p-2 bg-accent/20 rounded-lg">
+                  <BarChart3 className="w-4 h-4 text-accent" />
+               </div>
+               <h4 className="font-headline text-lg font-bold text-white tracking-tight">Operational Pulse</h4>
+            </div>
+            <div className="space-y-6">
+               {[
+                 { label: "Server Response", val: "24ms", trend: "Stable" },
+                 { label: "Data Integrity", val: "99.9%", trend: "Optimal" },
+                 { label: "Sync Status", val: "Active", trend: "Live" }
+               ].map((pulse, i) => (
+                 <div key={i} className="flex justify-between items-center">
+                    <span className="text-[10px] font-bold text-text-dim uppercase tracking-widest">{pulse.label}</span>
+                    <div className="text-right">
+                       <p className="text-sm font-bold text-white">{pulse.val}</p>
+                       <p className="text-[9px] font-bold text-accent-light uppercase tracking-widest">{pulse.trend}</p>
+                    </div>
+                 </div>
+               ))}
+            </div>
           </div>
         </div>
       </div>

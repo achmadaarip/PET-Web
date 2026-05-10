@@ -1,6 +1,6 @@
 import { Leaf, Lock, LogIn, Mail, PersonStanding, ShieldCheck, Verified, AlertCircle } from "lucide-react";
 import { motion } from "motion/react";
-import { useState } from "react";
+import { useState, FormEvent } from "react";
 import { IMAGES } from "../constants";
 
 interface LoginScreenProps {
@@ -12,7 +12,7 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     setError("");
 

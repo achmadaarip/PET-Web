@@ -22,7 +22,11 @@ import {
   Plus,
   Clock,
   MapPin,
-  AlertCircle
+  AlertCircle,
+  X,
+  CheckSquare,
+  Info,
+  Layers
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { IMAGES } from "../constants";
@@ -33,10 +37,12 @@ interface OperationalDashboardProps {
 
 export default function OperationalDashboard({ onLogout }: OperationalDashboardProps) {
   const [currentView, setCurrentView] = useState('Overview');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedCompany, setSelectedCompany] = useState<any>(null);
 
   const navItems = [
     { icon: LayoutDashboard, label: "Overview" },
-    { icon: PenTool, label: "Data Input" },
+    { icon: TrendingUp, label: "Progress" },
     { icon: Calendar, label: "Work Schedule" },
     { icon: ClipboardList, label: "QC Document" },
   ];
@@ -49,27 +55,119 @@ export default function OperationalDashboard({ onLogout }: OperationalDashboardP
       exit={{ opacity: 0, y: -20 }}
       className="space-y-8"
     >
-      {/* Operational Hub Grid */}
+      {/* Section 1: Hero Card & Schedule */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {/* Input Data Banner */}
-        <motion.div whileHover={{ y: -4 }} className="md:col-span-2 portal-card p-10 flex flex-col lg:flex-row gap-12 items-center relative overflow-hidden">
+        {/* Overall Progress Hero Card */}
+        <motion.div whileHover={{ y: -4 }} className="md:col-span-2 portal-card p-10 flex flex-col lg:flex-row gap-12 items-center relative overflow-hidden group">
            <div className="flex-1 relative z-10">
-              <div className="w-16 h-16 bg-accent/10 text-accent rounded-2xl flex items-center justify-center mb-8 border border-accent/20">
-                <PenTool className="w-8 h-8" />
+              <div className="w-16 h-16 bg-accent/10 text-accent rounded-2xl flex items-center justify-center mb-8 border border-accent/20 shadow-lg shadow-accent/10">
+                <TrendingUp className="w-8 h-8" />
               </div>
-              <h4 className="font-headline text-3xl font-bold text-white tracking-tight mb-4">Input Data Harian</h4>
+              <h4 className="font-headline text-3xl font-bold text-white tracking-tight mb-4">Overall Progress Pekerjaan</h4>
               <p className="text-sm text-text-dim font-medium mb-10 leading-relaxed opacity-80 max-w-md">
-                Laporkan temuan lapangan dan metrik lingkungan harian Anda langsung ke sistem pusat melalui spreadsheet terintegrasi.
+                Ringkasan akumulasi seluruh progress pekerjaan teknis dan administratif periode berjalan.
               </p>
-              <a className="btn-primary inline-flex items-center gap-3 px-10 py-4 text-sm" href="#">
-                Buka Spreadsheet
-                <ExternalLink className="w-4 h-4" />
-              </a>
+              
+              <div className="grid grid-cols-2 gap-8 mb-10">
+                <div>
+                   <span className="text-[10px] font-bold text-text-dim uppercase tracking-widest block mb-1">Active Documents</span>
+                   <p className="text-2xl font-bold text-white">42 <span className="text-xs text-text-dim">Files</span></p>
+                </div>
+                <div>
+                   <span className="text-[10px] font-bold text-text-dim uppercase tracking-widest block mb-1">Completed Tasks</span>
+                   <p className="text-2xl font-bold text-white">128 <span className="text-xs text-accent-light">+12</span></p>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <div className="flex justify-between items-end">
+                   <span className="text-[10px] font-bold text-accent uppercase tracking-[0.2em]">Weekly Productivity</span>
+                   <span className="text-sm font-bold text-white">68%</span>
+                </div>
+                <div className="h-2 bg-white/5 rounded-full overflow-hidden border border-white/5">
+                   <motion.div 
+                     initial={{ width: 0 }}
+                     animate={{ width: "68%" }}
+                     className="h-full bg-accent relative shadow-[0_0_15px_rgba(var(--accent),0.3)]"
+                   >
+                     <div className="absolute inset-0 bg-gradient-to-r from-transparent to-white/20"></div>
+                   </motion.div>
+                </div>
+              </div>
            </div>
-           <div className="w-full lg:w-2/5 aspect-square bg-slate-950/40 rounded-3xl overflow-hidden relative z-10 border border-white/5">
-              <img src={IMAGES.OPERATIONAL_APP} alt="App Interface" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000 opacity-40 brightness-50" />
-              <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent"></div>
+           
+           <div className="w-full lg:w-2/5 portal-card bg-slate-950/40 p-8 flex flex-col justify-between relative z-10 border border-white/5 h-full min-h-[320px]">
+              <div className="flex justify-between items-start">
+                 <h5 className="text-[10px] font-bold text-text-dim uppercase tracking-widest">Productivity Trend</h5>
+                 <TrendingUp className="w-4 h-4 text-emerald-400" />
+              </div>
+              {/* Smooth Line Chart with Glow */}
+              <div className="flex-1 relative my-8 min-h-[120px] group/chart">
+                <svg viewBox="0 0 400 120" className="w-full h-full overflow-visible">
+                  <defs>
+                    <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="rgba(var(--accent), 0.3)" />
+                      <stop offset="100%" stopColor="rgba(var(--accent), 0)" />
+                    </linearGradient>
+                    <filter id="glow">
+                      <feGaussianBlur stdDeviation="3" result="blur" />
+                      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                    </filter>
+                  </defs>
+                  
+                  {/* Area */}
+                  <motion.path
+                    initial={{ pathLength: 0, opacity: 0 }}
+                    animate={{ pathLength: 1, opacity: 1 }}
+                    transition={{ duration: 2, ease: "easeInOut" }}
+                    d="M 0,120 L 0,80 C 40,70 80,40 120,50 S 160,90 200,60 S 240,20 280,30 S 320,80 360,40 L 400,30 L 400,120 Z"
+                    fill="url(#chartGradient)"
+                  />
+                  
+                  {/* Line */}
+                  <motion.path
+                    initial={{ pathLength: 0 }}
+                    animate={{ pathLength: 1 }}
+                    transition={{ duration: 2, ease: "easeInOut" }}
+                    d="M 0,80 C 40,70 80,40 120,50 S 160,90 200,60 S 240,20 280,30 S 320,80 360,40 L 400,30"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="3"
+                    className="text-accent"
+                    style={{ filter: 'drop-shadow(0 0 8px rgba(var(--accent), 0.5))' }}
+                  />
+                  
+                  {/* Data Points */}
+                  {[
+                    { x: 0, y: 80 }, { x: 120, y: 50 }, { x: 200, y: 60 }, 
+                    { x: 280, y: 30 }, { x: 360, y: 40 }, { x: 400, y: 30 }
+                  ].map((p, i) => (
+                    <motion.circle
+                      key={i}
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ delay: 1 + i * 0.1 }}
+                      cx={p.x}
+                      cy={p.y}
+                      r="4"
+                      className="fill-bg-deep stroke-accent stroke-2"
+                    />
+                  ))}
+                </svg>
+              </div>
+              <div className="flex justify-between text-[8px] font-bold text-text-dim/60 uppercase">
+                 <span>Mon</span>
+                 <span>Sun</span>
+              </div>
+              <div className="mt-8 pt-8 border-t border-white/5">
+                 <p className="text-[10px] font-bold text-white mb-2">Recent activity summary</p>
+                 <div className="flex items-center gap-2 text-[9px] text-text-dim">
+                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-400"></div>
+                    <span>12 Docs validated in Sector A</span>
+                 </div>
+              </div>
            </div>
+           <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent pointer-events-none"></div>
         </motion.div>
 
         {/* Schedule Section */}
@@ -85,13 +183,124 @@ export default function OperationalDashboard({ onLogout }: OperationalDashboardP
            </div>
            <div className="mt-12">
               <button 
-                onClick={() => setCurrentView('Work Schedule (Jadwal Dinas)')}
+                onClick={() => setCurrentView('Work Schedule')}
                 className="text-accent font-bold text-xs uppercase tracking-[0.2em] hover:text-accent-light flex items-center gap-3 transition-all cursor-pointer group"
               >
                 View Full Schedule
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-2 transition-transform" />
               </button>
            </div>
+        </motion.div>
+      </div>
+
+      {/* NEW Middle Section: Analytics Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {/* Performance Analytics */}
+        <motion.div whileHover={{ y: -4 }} className="portal-card p-8 flex flex-col h-full group">
+          <div className="flex justify-between items-center mb-8">
+            <span className="text-[10px] font-bold text-text-dim uppercase tracking-widest">Performance Analytics</span>
+            <div className="p-2 bg-accent/5 rounded-lg border border-accent/10">
+               <TrendingUp className="w-3 h-3 text-accent" />
+            </div>
+          </div>
+          <div className="flex-1 flex items-center justify-center py-4">
+             {/* Simple Circular Progress Chart */}
+             <div className="relative w-32 h-32 flex items-center justify-center">
+                <svg className="w-full h-full -rotate-90">
+                   <circle cx="64" cy="64" r="56" className="fill-none stroke-white/5 stroke-[8]" />
+                   <motion.circle 
+                     cx="64" cy="64" r="56" 
+                     className="fill-none stroke-accent stroke-[8]"
+                     strokeDasharray="351.8"
+                     initial={{ strokeDashoffset: 351.8 }}
+                     animate={{ strokeDashoffset: 351.8 * (1 - 0.74) }}
+                     transition={{ duration: 1.5, ease: "easeOut" }}
+                   />
+                </svg>
+                <div className="absolute text-center">
+                   <p className="text-2xl font-bold text-white">74%</p>
+                   <p className="text-[8px] font-bold text-text-dim uppercase">Rating</p>
+                </div>
+             </div>
+          </div>
+          <div className="mt-8 grid grid-cols-2 gap-4 border-t border-white/5 pt-8">
+             <div>
+                <p className="text-[9px] font-bold text-text-dim uppercase tracking-wider mb-1">Efficiency</p>
+                <p className="text-sm font-bold text-accent">+12.4%</p>
+             </div>
+             <div>
+                <p className="text-[9px] font-bold text-text-dim uppercase tracking-wider mb-1">SLA Met</p>
+                <p className="text-sm font-bold text-white">98.2%</p>
+             </div>
+          </div>
+        </motion.div>
+
+        {/* Workload Distribution */}
+        <motion.div whileHover={{ y: -4 }} className="portal-card p-8 flex flex-col h-full group">
+           <div className="flex justify-between items-center mb-8">
+            <span className="text-[10px] font-bold text-text-dim uppercase tracking-widest">Workload Distribution</span>
+            <div className="p-2 bg-accent-light/5 rounded-lg border border-accent-light/10">
+               <Layers className="w-3 h-3 text-accent-light" />
+            </div>
+          </div>
+          <div className="flex-1 space-y-6">
+             {[
+               { label: "QC Document", val: 45, color: "bg-accent" },
+               { label: "Data Progress", val: 30, color: "bg-accent-light" },
+               { label: "Field Survey", val: 25, color: "bg-white/10" }
+             ].map((item, i) => (
+               <div key={i} className="space-y-2">
+                  <div className="flex justify-between text-[9px] font-bold uppercase tracking-widest text-text-dim">
+                     <span>{item.label}</span>
+                     <span className="text-white">{item.val}%</span>
+                  </div>
+                  <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
+                     <motion.div 
+                       initial={{ width: 0 }}
+                       animate={{ width: `${item.val}%` }}
+                       className={`h-full ${item.color}`}
+                     ></motion.div>
+                  </div>
+               </div>
+             ))}
+          </div>
+          <div className="mt-8 pt-8 border-t border-white/5 flex items-center justify-between">
+             <span className="text-[9px] font-bold text-text-dim uppercase">Total Workload</span>
+             <span className="text-xs font-bold text-white uppercase tracking-widest px-2 py-0.5 rounded bg-accent/10 border border-accent/20">Optimal</span>
+          </div>
+        </motion.div>
+
+        {/* Weekly Completion Stats */}
+        <motion.div whileHover={{ y: -4 }} className="portal-card p-8 flex flex-col h-full group">
+           <div className="flex justify-between items-center mb-8">
+            <span className="text-[10px] font-bold text-text-dim uppercase tracking-widest">Weekly Completion</span>
+            <div className="p-2 bg-emerald-400/5 rounded-lg border border-emerald-400/10">
+               <CheckCircle className="w-3 h-3 text-emerald-400" />
+            </div>
+          </div>
+          <div className="flex-1 flex items-end gap-3 justify-between pb-2 px-2">
+             {[50, 40, 70, 45, 90].map((h, i) => (
+               <div key={i} className="flex-1 h-full flex flex-col justify-end items-center gap-3">
+                  <motion.div 
+                    initial={{ height: 0 }}
+                    animate={{ height: `${h}%` }}
+                    className="w-full bg-emerald-400/40 rounded-t-lg group-hover:bg-emerald-400 transition-colors"
+                  ></motion.div>
+                  <span className="text-[8px] font-bold text-text-dim uppercase">{['M','T','W','T','F'][i]}</span>
+               </div>
+             ))}
+          </div>
+          <div className="mt-8 pt-8 border-t border-white/5">
+             <div className="flex items-center gap-3">
+                <div className="p-2 bg-emerald-400/10 rounded border border-emerald-400/20">
+                   <Plus className="w-3 h-3 text-emerald-400" />
+                </div>
+                <div>
+                   <p className="text-[9px] font-bold text-text-dim uppercase mb-0.5">Peak Productivity</p>
+                   <p className="text-xs font-bold text-white">Friday <span className="text-text-dim font-medium text-[10px] ml-1">90% Completion Rate</span></p>
+                </div>
+             </div>
+          </div>
         </motion.div>
       </div>
 
@@ -140,78 +349,214 @@ export default function OperationalDashboard({ onLogout }: OperationalDashboardP
     </motion.div>
   );
 
-  const renderDataInput = () => (
+  const renderProgress = () => (
     <motion.div 
-      key="data-input"
+      key="progress"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
-      className="space-y-8"
+      className="space-y-12"
     >
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {[
-          { label: "Today's Submissions", val: "12", icon: ClipboardList, color: "text-accent" },
-          { label: "Pending Sync", val: "03", icon: Clock, color: "text-amber-400" },
-          { label: "Approval Rate", val: "98%", icon: CheckCircle, color: "text-emerald-400" },
-        ].map((stat, i) => (
-          <div key={i} className="portal-card p-8 flex items-center gap-6">
-            <div className={`p-4 rounded-2xl bg-white/[0.03] ${stat.color} border border-white/5`}>
-              <stat.icon className="w-6 h-6" />
-            </div>
+      {/* Section 1: Document Progress Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        {/* Dokumen Proper */}
+        <motion.div whileHover={{ y: -4 }} className="portal-card p-10 relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-accent/5 rounded-bl-full pointer-events-none"></div>
+          <div className="flex justify-between items-start mb-10">
             <div>
-              <p className="text-[10px] font-bold text-text-dim uppercase tracking-widest">{stat.label}</p>
-              <p className="text-3xl font-bold text-white mt-1">{stat.val}</p>
+              <span className="text-[10px] font-bold text-accent uppercase tracking-[0.2em] mb-2 block">Document Category</span>
+              <h4 className="font-headline text-3xl font-bold text-white tracking-tight">Dokumen Proper</h4>
+            </div>
+            <div className="p-4 bg-accent/10 border border-accent/20 rounded-2xl text-accent">
+              <Layers className="w-6 h-6" />
             </div>
           </div>
-        ))}
+          
+          <div className="flex items-end gap-6 mb-8">
+            <div className="font-headline text-6xl font-bold text-white tracking-tighter">72%</div>
+            <div className="mb-2">
+              <span className="text-xl font-bold text-white/80">45 <span className="text-text-dim text-sm">/ 62</span></span>
+              <p className="text-[10px] font-bold text-text-dim uppercase tracking-widest mt-1">Files Completed</p>
+            </div>
+          </div>
+
+          <div className="space-y-6">
+            <div className="h-2.5 bg-white/5 rounded-full overflow-hidden border border-white/5">
+              <motion.div 
+                initial={{ width: 0 }}
+                animate={{ width: "72%" }}
+                className="h-full bg-accent relative"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent to-white/20"></div>
+              </motion.div>
+            </div>
+            <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest text-text-dim">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-accent"></div>
+                <span>Sync Active</span>
+              </div>
+              <span className="text-accent-light">Recent activity: 2h ago</span>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Dokumen Non-Proper */}
+        <motion.div whileHover={{ y: -4 }} className="portal-card p-10 relative overflow-hidden group border-amber-500/20">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-bl-full pointer-events-none"></div>
+          <div className="flex justify-between items-start mb-10">
+            <div>
+              <span className="text-[10px] font-bold text-amber-500 uppercase tracking-[0.2em] mb-2 block">Priority Category</span>
+              <h4 className="font-headline text-3xl font-bold text-white tracking-tight">Dokumen Non-Proper</h4>
+            </div>
+            <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl text-amber-500">
+              <CheckSquare className="w-6 h-6" />
+            </div>
+          </div>
+          
+          <div className="flex items-end gap-6 mb-8">
+            <div className="font-headline text-6xl font-bold text-white tracking-tighter text-shadow-glow">48%</div>
+            <div className="mb-2">
+              <span className="text-xl font-bold text-white/80">14 <span className="text-text-dim text-sm">/ 29</span></span>
+              <p className="text-[10px] font-bold text-text-dim uppercase tracking-widest mt-1">Files Verified</p>
+            </div>
+          </div>
+
+          <div className="space-y-6">
+            <div className="h-2.5 bg-white/5 rounded-full overflow-hidden border border-white/5">
+              <motion.div 
+                initial={{ width: 0 }}
+                animate={{ width: "48%" }}
+                className="h-full bg-amber-500 relative shadow-[0_0_15px_rgba(245,158,11,0.3)]"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent to-white/20"></div>
+              </motion.div>
+            </div>
+            <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest text-text-dim">
+              <div className="flex items-center gap-2 text-amber-400">
+                <Clock className="w-2.5 h-2.5" />
+                <span>Urgent Review</span>
+              </div>
+              <span className="text-amber-200/50">Recent activity: 5h ago</span>
+            </div>
+          </div>
+        </motion.div>
       </div>
 
-      <div className="portal-card p-10">
+      {/* Section 2: Overall Summary */}
+      <div className="space-y-8">
+        <h3 className="font-headline text-2xl font-bold text-white tracking-tight flex items-center gap-4">
+          Overall Summary
+          <div className="h-px bg-white/5 flex-1"></div>
+        </h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          {[
+            { label: "Overall Progress", val: "64.5%", icon: TrendingUp, trend: "+4.2%", color: "text-accent" },
+            { label: "Total Beban Teknis", val: "148h", icon: BarChart3, trend: "Stable", color: "text-blue-400" },
+            { label: "Total Dokumen Diampu", val: "91", icon: Layers, trend: "+5 new", color: "text-emerald-400" },
+            { label: "Total Dokumen Selesai", val: "59", icon: CheckCircle, trend: "65% Rate", color: "text-purple-400" },
+          ].map((stat, i) => (
+            <div key={i} className="portal-card p-8 group">
+              <div className="flex justify-between items-start mb-6">
+                <div className={`p-3 rounded-xl bg-white/[0.03] border border-white/5 ${stat.color}`}>
+                  <stat.icon className="w-5 h-5" />
+                </div>
+                <span className={`text-[10px] font-bold px-2 py-1 rounded bg-white/5 border border-white/10 uppercase tracking-widest ${stat.trend.includes('+') ? 'text-emerald-400' : 'text-text-dim'}`}>
+                  {stat.trend}
+                </span>
+              </div>
+              <p className="text-[10px] font-bold text-text-dim uppercase tracking-widest mb-1">{stat.label}</p>
+              <p className="text-3xl font-bold text-white tracking-tight">{stat.val}</p>
+              <div className="mt-4 h-1 bg-white/5 rounded-full overflow-hidden">
+                <div className={`h-full opacity-40 ${stat.color.replace('text', 'bg')}`} style={{ width: '60%' }}></div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Section 3: Company Data Table */}
+      <div className="portal-card p-10 overflow-hidden">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
           <div>
-            <h3 className="font-headline text-2xl font-bold text-white">Daily Data Submission</h3>
-            <p className="text-sm text-text-dim mt-1">Review and manage your daily field data entries.</p>
+            <h3 className="font-headline text-2xl font-bold text-white">Company Progress Hub</h3>
+            <p className="text-sm text-text-dim mt-1">Real-time monitoring of consultant data synchronization.</p>
           </div>
-          <button className="btn-primary flex items-center gap-2 px-8">
-            <Plus className="w-4 h-4" />
-            New Entry
-          </button>
+          <div className="flex gap-4">
+             <div className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl flex items-center gap-3">
+                <div className="w-2 h-2 rounded-full bg-emerald-400"></div>
+                <span className="text-[10px] font-bold text-white uppercase tracking-widest">34 On Track</span>
+             </div>
+             <div className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl flex items-center gap-3">
+                <div className="w-2 h-2 rounded-full bg-amber-400"></div>
+                <span className="text-[10px] font-bold text-white uppercase tracking-widest">12 Delayed</span>
+             </div>
+          </div>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+        <div className="overflow-x-auto -mx-10 px-10">
+          <table className="w-full text-left border-collapse min-w-[800px]">
             <thead>
-              <tr className="border-b border-white/5">
-                {["Entry Name", "Location", "Time", "Status", "Actions"].map((h) => (
-                  <th key={h} className="pb-6 text-[10px] font-bold text-text-dim uppercase tracking-widest">{h}</th>
-                ))}
+              <tr className="border-b border-white/5 bg-white/[0.02]">
+                <th className="py-6 px-4 text-[10px] font-bold text-text-dim uppercase tracking-widest first:rounded-tl-2xl">Nama Perusahaan</th>
+                <th className="py-6 px-4 text-[10px] font-bold text-text-dim uppercase tracking-widest">% Data Diterima</th>
+                <th className="py-6 px-4 text-[10px] font-bold text-text-dim uppercase tracking-widest">% Progress</th>
+                <th className="py-6 px-4 text-[10px] font-bold text-text-dim uppercase tracking-widest">Status</th>
+                <th className="py-6 px-4 text-[10px] font-bold text-text-dim uppercase tracking-widest text-right last:rounded-tr-2xl">Action</th>
               </tr>
             </thead>
             <tbody className="text-sm font-medium">
               {[
-                { name: "Daily Area Monitoring", loc: "Site A-12", time: "09:30 AM", status: "Synced", sColor: "bg-emerald-400" },
-                { name: "Water Level Record", loc: "River Gate 04", time: "11:15 AM", status: "Pending", sColor: "bg-amber-400" },
-                { name: "SOP Safety Checklist", loc: "Main Facility", time: "01:20 PM", status: "Synced", sColor: "bg-emerald-400" },
-                { name: "Soil Sample Metadata", loc: "Sector 09", time: "03:45 PM", status: "Draft", sColor: "bg-text-dim" },
+                { name: "EcoGuard Solutions", received: 95, progress: 88, status: "Active" },
+                { name: "TerraForm Consulting", received: 100, progress: 45, status: "Review" },
+                { name: "GreenPath Logistics", received: 60, progress: 20, status: "Draft" },
+                { name: "BioMetric Systems", received: 85, progress: 92, status: "Active" },
+                { name: "AquaPure Environment", received: 30, progress: 15, status: "Delayed" },
+                { name: "Solaris Industrial", received: 90, progress: 75, status: "Active" },
               ].map((row, i) => (
-                <tr key={i} className="border-b border-white/5 last:border-0 group">
-                  <td className="py-6 pr-4">
+                <tr key={i} className="border-b border-white/5 last:border-0 hover:bg-white/[0.03] transition-all group">
+                  <td className="py-6 px-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-2 h-2 rounded-full bg-accent"></div>
-                      <span className="text-white">{row.name}</span>
+                      <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-accent">
+                        {row.name[0]}
+                      </div>
+                      <span className="text-white font-bold">{row.name}</span>
                     </div>
                   </td>
-                  <td className="py-6 text-text-dim">{row.loc}</td>
-                  <td className="py-6 text-text-dim">{row.time}</td>
-                  <td className="py-6">
-                    <div className="flex items-center gap-2">
-                      <div className={`w-1.5 h-1.5 rounded-full ${row.sColor}`}></div>
-                      <span className="text-white/80">{row.status}</span>
+                  <td className="py-6 px-4">
+                    <div className="flex items-center gap-3">
+                      <span className="text-text-dim w-10">{row.received}%</span>
+                      <div className="flex-1 h-1 bg-white/5 rounded-full max-w-[60px] overflow-hidden">
+                        <div className="h-full bg-accent-light" style={{ width: `${row.received}%` }}></div>
+                      </div>
                     </div>
                   </td>
-                  <td className="py-6">
-                    <button className="p-2 hover:bg-white/5 rounded-lg text-text-dim hover:text-white transition-all">
-                      <ExternalLink className="w-4 h-4" />
+                  <td className="py-6 px-4">
+                    <div className="flex items-center gap-3">
+                      <span className="text-white w-10">{row.progress}%</span>
+                      <div className="flex-1 h-1 bg-white/5 rounded-full max-w-[60px] overflow-hidden">
+                        <div className="h-full bg-accent" style={{ width: `${row.progress}%` }}></div>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="py-6 px-4">
+                    <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border ${
+                      row.status === 'Active' ? 'bg-emerald-400/10 border-emerald-400/20 text-emerald-400' :
+                      row.status === 'Review' ? 'bg-amber-400/10 border-amber-400/20 text-amber-400' :
+                      row.status === 'Delayed' ? 'bg-red-400/10 border-red-400/20 text-red-400' :
+                      'bg-white/5 border-white/10 text-text-dim'
+                    }`}>
+                      {row.status}
+                    </span>
+                  </td>
+                  <td className="py-6 px-4 text-right">
+                    <button 
+                      onClick={() => {
+                        setSelectedCompany(row);
+                        setIsModalOpen(true);
+                      }}
+                      className="px-4 py-2 bg-accent/10 border border-accent/20 rounded-xl text-accent text-[10px] font-bold uppercase tracking-widest hover:bg-accent hover:text-bg-deep transition-all active:scale-95"
+                    >
+                      View Detail
                     </button>
                   </td>
                 </tr>
@@ -220,6 +565,142 @@ export default function OperationalDashboard({ onLogout }: OperationalDashboardP
           </table>
         </div>
       </div>
+
+      {/* Modal Popup */}
+      <AnimatePresence>
+        {isModalOpen && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 sm:p-12">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsModalOpen(false)}
+              className="absolute inset-0 bg-bg-deep/80 backdrop-blur-md"
+            ></motion.div>
+            
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative w-full max-w-3xl glass shadow-2xl rounded-[40px] overflow-hidden flex flex-col max-h-[85vh] border border-white/10"
+            >
+              {/* Modal Header */}
+              <div className="p-8 pb-4 flex justify-between items-start">
+                <div className="flex gap-6 items-center">
+                  <div className="w-16 h-16 rounded-3xl bg-accent flex items-center justify-center text-bg-deep">
+                    <BarChart3 className="w-8 h-8" />
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-bold text-white tracking-tight">{selectedCompany?.name}</h3>
+                    <div className="flex items-center gap-3 mt-1">
+                      <span className="text-[10px] font-bold text-accent uppercase tracking-widest">Detail Checklist</span>
+                      <div className="w-1 h-1 rounded-full bg-white/20"></div>
+                      <span className="text-[10px] font-bold text-text-dim uppercase tracking-widest">ID: {Math.random().toString(36).substr(2, 6).toUpperCase()}</span>
+                    </div>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => setIsModalOpen(false)}
+                  className="p-3 bg-white/5 border border-white/10 rounded-2xl text-text-dim hover:text-white transition-all hover:bg-white/10"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Modal Content - Scrollable */}
+              <div className="flex-1 overflow-y-auto p-8 space-y-10 custom-scrollbar">
+                {/* Stats Grid */}
+                <div className="grid grid-cols-2 gap-6">
+                  <div className="p-6 rounded-3xl bg-white/[0.03] border border-white/5">
+                    <span className="text-[10px] font-bold text-text-dim uppercase tracking-widest mb-3 block">Data Transmission</span>
+                    <div className="flex items-end gap-3 font-headline">
+                      <span className="text-3xl font-bold text-white">{selectedCompany?.received}%</span>
+                      <span className="text-sm font-bold text-accent-light mb-1.5 uppercase">Syncing</span>
+                    </div>
+                  </div>
+                  <div className="p-6 rounded-3xl bg-white/[0.03] border border-white/5">
+                    <span className="text-[10px] font-bold text-text-dim uppercase tracking-widest mb-3 block">Validation Status</span>
+                    <div className="flex items-end gap-3 font-headline">
+                      <span className={`text-3xl font-bold ${selectedCompany?.progress > 80 ? 'text-emerald-400' : 'text-amber-400'}`}>{selectedCompany?.progress}%</span>
+                      <span className="text-sm font-bold text-text-dim mb-1.5 uppercase">Passed</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Checklist Form */}
+                <div className="space-y-6">
+                  <h4 className="font-headline text-lg font-bold text-white flex items-center gap-3">
+                    <CheckSquare className="w-5 h-5 text-accent" />
+                    Validation Checklist
+                  </h4>
+                  <div className="space-y-4">
+                    {[
+                      { task: "Struktur Dokumen Sesuai Format", status: "Verified" },
+                      { task: "Legalitas Perusahaan Terlampir", status: "Verified" },
+                      { task: "Metadata Koordinat Lapangan", status: "Pending" },
+                      { task: "Hasil Uji Lab Terakreditasi", status: "In Reviews" },
+                      { task: "Tanda Tangan Elektronik Pengampu", status: "Awaiting" }
+                    ].map((item, i) => (
+                      <div key={i} className="flex items-center justify-between p-5 rounded-2xl bg-white/[0.02] border border-white/5 group hover:border-white/10 transition-all">
+                        <div className="flex items-center gap-4">
+                          <div className={`w-6 h-6 rounded-lg border flex items-center justify-center transition-all ${item.status === 'Verified' ? 'bg-accent/20 border-accent text-accent' : 'border-white/10 text-white/10'}`}>
+                            {item.status === 'Verified' && <CheckCircle className="w-3.5 h-3.5" />}
+                          </div>
+                          <span className="text-sm font-medium text-white/80">{item.task}</span>
+                        </div>
+                        <span className={`text-[10px] font-bold uppercase tracking-widest ${
+                          item.status === 'Verified' ? 'text-accent' : 
+                          item.status === 'Pending' ? 'text-amber-400' : 'text-text-dim'
+                        }`}>{item.status}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Notes Section */}
+                <div className="space-y-4">
+                  <h4 className="font-headline text-lg font-bold text-white flex items-center gap-3">
+                    <Info className="w-5 h-5 text-accent" />
+                    Operational Notes
+                  </h4>
+                  <textarea 
+                    className="w-full bg-white/[0.03] border border-white/10 rounded-2xl p-6 text-sm text-white/70 focus:ring-2 focus:ring-accent/40 outline-none transition-all placeholder:text-text-dim/30 min-h-[120px]"
+                    placeholder="Add validation notes or internal feedback here..."
+                    defaultValue="Data koordinat masih perlu divalidasi ulang dengan tim SIG. Dokumen legalitas sudah lengkap dan sesuai dengan standar terbaru."
+                  ></textarea>
+                </div>
+
+                {/* Status Indicator */}
+                <div className="p-6 rounded-3xl bg-accent-light/5 border border-accent-light/10 flex items-center gap-6">
+                    <div className="w-12 h-12 rounded-2xl bg-accent-light/10 flex items-center justify-center text-accent-light">
+                      <Clock className="w-6 h-6" />
+                    </div>
+                    <div>
+                       <p className="text-sm font-bold text-white">Verification Deadline</p>
+                       <p className="text-xs text-text-dim mt-1">Sistem akan mengunci entry ini dalam <span className="text-accent-light font-bold">48 jam</span></p>
+                    </div>
+                </div>
+              </div>
+
+              {/* Modal Footer */}
+              <div className="p-8 pt-4 bg-white/[0.02] border-t border-white/5 flex gap-4">
+                <button 
+                  onClick={() => setIsModalOpen(false)}
+                  className="flex-1 py-4 bg-white/5 border border-white/10 rounded-2xl text-white font-bold text-xs uppercase tracking-widest hover:bg-white/10 transition-all"
+                >
+                  Close Detail
+                </button>
+                <button 
+                  onClick={() => setIsModalOpen(false)}
+                  className="flex-1 py-4 bg-accent rounded-2xl text-bg-deep font-bold text-xs uppercase tracking-widest hover:bg-accent-light transition-all shadow-lg shadow-accent/20"
+                >
+                  Save Changes
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 
@@ -311,67 +792,169 @@ export default function OperationalDashboard({ onLogout }: OperationalDashboardP
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
-      className="space-y-8"
+      className="space-y-12"
     >
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div className="portal-card p-10 md:col-span-2">
-          <div className="flex items-center justify-between mb-10">
+      {/* Section 1: QC Progress Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        {/* QC Proper */}
+        <motion.div whileHover={{ y: -4 }} className="portal-card p-10 relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-accent/5 rounded-bl-full pointer-events-none"></div>
+          <div className="flex justify-between items-start mb-10">
             <div>
-              <h3 className="font-headline text-2xl font-bold text-white">QC Status Tracker</h3>
-              <p className="text-sm text-text-dim mt-1">Validation progress for your recent document formatting.</p>
+              <span className="text-[10px] font-bold text-accent uppercase tracking-[0.2em] mb-2 block">Quality Control</span>
+              <h4 className="font-headline text-3xl font-bold text-white tracking-tight">QC Proper</h4>
             </div>
-            <div className="flex items-center gap-2 text-accent">
-              <BarChart3 className="w-5 h-5" />
-              <span className="text-lg font-bold font-headline">88%</span>
+            <div className="p-4 bg-accent/10 border border-accent/20 rounded-2xl text-accent">
+              <ShieldCheck className="w-6 h-6" />
+            </div>
+          </div>
+          
+          <div className="flex items-end gap-6 mb-8">
+            <div className="font-headline text-6xl font-bold text-white tracking-tighter">84%</div>
+            <div className="mb-2">
+              <span className="text-xl font-bold text-white/80">52 <span className="text-text-dim text-sm">/ 62</span></span>
+              <p className="text-[10px] font-bold text-text-dim uppercase tracking-widest mt-1">QC Passed</p>
             </div>
           </div>
 
-          <div className="space-y-10">
-            {[
-              { doc: "Environmental Baseline Report", progress: 95, status: "Final Review" },
-              { doc: "Waste Management Plan v2", progress: 60, status: "Formatting" },
-              { doc: "Sustainability Disclosure", progress: 30, status: "Draft" },
-            ].map((d, i) => (
-              <div key={i} className="space-y-3">
-                <div className="flex justify-between text-sm font-bold">
-                  <span className="text-white">{d.doc}</span>
-                  <span className="text-text-dim">{d.status}</span>
-                </div>
-                <div className="h-2 bg-white/5 rounded-full overflow-hidden border border-white/5">
-                  <motion.div 
-                    initial={{ width: 0 }}
-                    animate={{ width: `${d.progress}%` }}
-                    className="h-full bg-accent relative"
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent to-white/20"></div>
-                  </motion.div>
-                </div>
+          <div className="space-y-6">
+            <div className="h-2.5 bg-white/5 rounded-full overflow-hidden border border-white/5">
+              <motion.div 
+                initial={{ width: 0 }}
+                animate={{ width: "84%" }}
+                className="h-full bg-accent relative"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent to-white/20"></div>
+              </motion.div>
+            </div>
+            <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest text-text-dim">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-accent"></div>
+                <span>Validator Online</span>
               </div>
-            ))}
+              <span className="text-accent-light">Recent QC: 45m ago</span>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* QC Non-Proper */}
+        <motion.div whileHover={{ y: -4 }} className="portal-card p-10 relative overflow-hidden group border-amber-500/20">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-bl-full pointer-events-none"></div>
+          <div className="flex justify-between items-start mb-10">
+            <div>
+              <span className="text-[10px] font-bold text-amber-500 uppercase tracking-[0.2em] mb-2 block">Quality Control</span>
+              <h4 className="font-headline text-3xl font-bold text-white tracking-tight">QC Non-Proper</h4>
+            </div>
+            <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl text-amber-500">
+              <ClipboardList className="w-6 h-6" />
+            </div>
+          </div>
+          
+          <div className="flex items-end gap-6 mb-8">
+            <div className="font-headline text-6xl font-bold text-white tracking-tighter">35%</div>
+            <div className="mb-2">
+              <span className="text-xl font-bold text-white/80">10 <span className="text-text-dim text-sm">/ 29</span></span>
+              <p className="text-[10px] font-bold text-text-dim uppercase tracking-widest mt-1">QC Passed</p>
+            </div>
+          </div>
+
+          <div className="space-y-6">
+            <div className="h-2.5 bg-white/5 rounded-full overflow-hidden border border-white/5">
+              <motion.div 
+                initial={{ width: 0 }}
+                animate={{ width: "35%" }}
+                className="h-full bg-amber-500 relative shadow-[0_0_15px_rgba(245,158,11,0.3)]"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent to-white/20"></div>
+              </motion.div>
+            </div>
+            <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest text-text-dim">
+              <div className="flex items-center gap-2 text-amber-400">
+                <AlertCircle className="w-2.5 h-2.5" />
+                <span>Pending Review</span>
+              </div>
+              <span className="text-amber-200/50">Recent QC: 3h ago</span>
+            </div>
+          </div>
+        </motion.div>
+      </div>
+
+      {/* Section 2: Company Progress Table */}
+      <div className="portal-card p-10 overflow-hidden">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
+          <div>
+            <h3 className="font-headline text-2xl font-bold text-white text-shadow-sm">QC Company Progress</h3>
+            <p className="text-sm text-text-dim mt-1">Reviewing document formatting and technical compliance.</p>
+          </div>
+          <div className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl flex items-center gap-3">
+             <div className="w-2 h-2 rounded-full bg-accent-light"></div>
+             <span className="text-[10px] font-bold text-white uppercase tracking-widest">Formatting Portal Active</span>
           </div>
         </div>
 
-        <div className="portal-card p-8 bg-accent/5 border-accent/10">
-          <h4 className="font-headline text-xl font-bold text-white mb-6">QC Checklist</h4>
-          <div className="space-y-4">
-            {[
-              { task: "Standard Layout Applied", done: true },
-              { task: "Metadata Tags Included", done: true },
-              { task: "Resolution Check Complete", done: false },
-              { task: "Reference Cross-check", done: false },
-              { task: "Final PDF Conversion", done: false },
-            ].map((item, i) => (
-              <div key={i} className="flex items-center gap-4 group cursor-pointer">
-                <div className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all ${item.done ? 'bg-accent border-accent text-bg-deep' : 'bg-transparent border-white/20 group-hover:border-accent/50'}`}>
-                  {item.done && <CheckCircle className="w-3.5 h-3.5" />}
-                </div>
-                <span className={`text-sm font-medium ${item.done ? 'text-white' : 'text-text-dim group-hover:text-white/80'}`}>{item.task}</span>
-              </div>
-            ))}
-          </div>
+        <div className="overflow-x-auto -mx-10 px-10">
+          <table className="w-full text-left border-collapse min-w-[700px]">
+            <thead>
+              <tr className="border-b border-white/5 bg-white/[0.02]">
+                <th className="py-6 px-4 text-[10px] font-bold text-text-dim uppercase tracking-widest first:rounded-tl-2xl">Nama Perusahaan</th>
+                <th className="py-6 px-4 text-[10px] font-bold text-text-dim uppercase tracking-widest">% Progress</th>
+                <th className="py-6 px-4 text-[10px] font-bold text-text-dim uppercase tracking-widest">Status</th>
+                <th className="py-6 px-4 text-[10px] font-bold text-text-dim uppercase tracking-widest text-right last:rounded-tr-2xl">Action</th>
+              </tr>
+            </thead>
+            <tbody className="text-sm font-medium">
+              {[
+                { name: "EcoGuard Solutions", progress: 92, status: "Verified" },
+                { name: "TerraForm Consulting", progress: 48, status: "In Review" },
+                { name: "GreenPath Logistics", progress: 15, status: "Revision" },
+                { name: "BioMetric Systems", progress: 85, status: "Verified" },
+                { name: "AquaPure Environment", progress: 60, status: "In Review" },
+              ].map((row, i) => (
+                <tr key={i} className="border-b border-white/5 last:border-0 hover:bg-white/[0.03] transition-all group">
+                  <td className="py-6 px-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-accent">
+                        {row.name[0]}
+                      </div>
+                      <span className="text-white font-bold">{row.name}</span>
+                    </div>
+                  </td>
+                  <td className="py-6 px-4">
+                    <div className="flex items-center gap-3">
+                      <span className="text-white w-10">{row.progress}%</span>
+                      <div className="flex-1 h-1 bg-white/5 rounded-full max-w-[100px] overflow-hidden">
+                        <div className="h-full bg-accent" style={{ width: `${row.progress}%` }}></div>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="py-6 px-4">
+                    <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border ${
+                      row.status === 'Verified' ? 'bg-emerald-400/10 border-emerald-400/20 text-emerald-400' :
+                      row.status === 'In Review' ? 'bg-amber-400/10 border-amber-400/20 text-amber-400' :
+                      'bg-red-400/10 border-red-400/20 text-red-400'
+                    }`}>
+                      {row.status}
+                    </span>
+                  </td>
+                  <td className="py-6 px-4 text-right">
+                    <button 
+                      onClick={() => {
+                        setSelectedCompany({...row, received: row.progress + 5}); // Dummy received data for modal
+                        setIsModalOpen(true);
+                      }}
+                      className="px-4 py-2 bg-accent/10 border border-accent/20 rounded-xl text-accent text-[10px] font-bold uppercase tracking-widest hover:bg-accent hover:text-bg-deep transition-all active:scale-95"
+                    >
+                      QC Checklist
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
 
+      {/* Section 3: Guidelines & Portal (Existing) */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <motion.div whileHover={{ y: -4 }} className="portal-card p-10 flex gap-8 items-start">
           <div className="p-4 rounded-2xl bg-white/[0.03] text-accent border border-white/5 shrink-0">
@@ -479,9 +1062,9 @@ export default function OperationalDashboard({ onLogout }: OperationalDashboardP
         <section className="flex-1">
           <AnimatePresence mode="wait">
             {currentView === 'Overview' && renderOverview()}
-            {currentView === 'Data Input' && renderDataInput()}
-            {currentView === 'Work Schedule (Jadwal Dinas)' && renderWorkSchedule()}
-            {currentView === 'Document Formatting (QC Document)' && renderQCDocument()}
+            {currentView === 'Progress' && renderProgress()}
+            {currentView === 'Work Schedule' && renderWorkSchedule()}
+            {currentView === 'QC Document' && renderQCDocument()}
             {currentView === 'System Settings' && <div key="settings" className="portal-card p-10 font-headline text-white text-2xl font-bold">System Settings coming soon...</div>}
           </AnimatePresence>
         </section>
