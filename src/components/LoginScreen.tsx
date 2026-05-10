@@ -1,5 +1,6 @@
-import { Leaf, Lock, LogIn, PersonStanding, ShieldCheck, Verified } from "lucide-react";
+import { Leaf, Lock, LogIn, Mail, PersonStanding, ShieldCheck, Verified, AlertCircle } from "lucide-react";
 import { motion } from "motion/react";
+import { useState } from "react";
 import { IMAGES } from "../constants";
 
 interface LoginScreenProps {
@@ -7,14 +8,25 @@ interface LoginScreenProps {
 }
 
 export default function LoginScreen({ onLogin }: LoginScreenProps) {
-  return (
-    <div className="min-h-screen bg-background flex flex-col font-sans text-on-background relative overflow-hidden">
-      {/* Decorative gradient patches */}
-      <div className="absolute top-0 left-0 w-full h-full pointer-events-none opacity-20">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary-container rounded-full blur-[120px]"></div>
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-secondary-container rounded-full blur-[120px]"></div>
-      </div>
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+
+    if (email === "admin@eda.com" && password === "admin123") {
+      onLogin("admin");
+    } else if (email === "staff@eda.com" && password === "staff123") {
+      onLogin("staff");
+    } else {
+      setError("Email atau password salah. Silakan coba lagi.");
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-bg-deep flex flex-col font-sans text-text-main relative overflow-hidden">
       <div className="flex-grow flex items-center justify-center px-4 md:px-12 py-12 relative z-10">
         <div className="max-w-md w-full">
           {/* Brand Logo */}
@@ -24,117 +36,102 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
               animate={{ opacity: 1, scale: 1 }}
               className="flex items-center justify-center gap-2 mb-4"
             >
-              <Leaf className="w-10 h-10 text-primary" />
-              <h1 className="font-headline text-3xl font-bold text-primary">Properindo Enviro Tech</h1>
+              <h1 className="font-headline text-3xl font-bold text-white tracking-tight">EDA Monitoring System</h1>
             </motion.div>
-            <h2 className="font-headline text-lg text-on-surface-variant font-medium">Masuk ke Portal</h2>
-            <p className="font-sans text-sm text-on-surface-variant/70 mt-2 italic">Silakan pilih role simulasi di bawah ini:</p>
           </div>
 
-          {/* Role Selection Buttons (for demo purposes) */}
-          <div className="flex gap-4 mb-8">
-            <button 
-              onClick={() => onLogin('admin')}
-              className="flex-1 py-3 px-4 bg-primary text-white rounded-lg font-bold hover:bg-primary-container transition-all flex items-center justify-center gap-2"
-            >
-              SPV Role
-            </button>
-            <button 
-              onClick={() => onLogin('staff')}
-              className="flex-1 py-3 px-4 bg-secondary text-white rounded-lg font-bold hover:bg-secondary-container hover:text-primary transition-all flex items-center justify-center gap-2"
-            >
-              Staff Role
-            </button>
-          </div>
-
-          {/* Login Card (visual only) */}
+          {/* Login Card */}
           <motion.div 
              initial={{ opacity: 0, y: 20 }}
              animate={{ opacity: 1, y: 0 }}
-             className="bg-surface-container-lowest p-8 rounded-2xl border border-outline-variant/30 shadow-xl"
+             className="glass-card p-10 rounded-[2rem]"
           >
-            <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-on-surface-variant uppercase tracking-widest pl-1" htmlFor="username">Username atau Email</label>
+            {error && (
+              <motion.div 
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="mb-8 p-4 bg-red-500/10 border border-red-500/30 rounded-xl flex items-center gap-3 text-red-400 text-sm"
+              >
+                <AlertCircle className="w-5 h-5 shrink-0" />
+                <span>{error}</span>
+              </motion.div>
+            )}
+
+            <form className="space-y-8" onSubmit={handleSubmit}>
+              <div className="flex flex-col gap-3">
+                <label className="text-xs font-bold text-text-dim uppercase tracking-widest pl-1" htmlFor="email">Email Address</label>
                 <div className="relative">
-                  <PersonStanding className="absolute left-3 top-1/2 -translate-y-1/2 text-outline w-5 h-5" />
+                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-text-dim/50 w-5 h-5" />
                   <input 
-                    className="w-full pl-10 pr-4 py-3 bg-background border border-outline-variant rounded-xl focus:ring-2 focus:ring-secondary outline-none transition-all"
-                    id="username"
-                    placeholder="nama@perusahaan.com"
-                    type="text"
+                    required
+                    className="w-full pl-12 pr-4 py-4 bg-white/[0.03] border border-white/5 rounded-2xl focus:ring-2 focus:ring-accent/50 outline-none transition-all text-white placeholder:text-white/10"
+                    id="email"
+                    placeholder="email@eda.com"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                   />
                 </div>
               </div>
 
-              <div className="space-y-2">
+              <div className="flex flex-col gap-3">
                 <div className="flex justify-between items-center">
-                  <label className="text-xs font-bold text-on-surface-variant uppercase tracking-widest pl-1" htmlFor="password">Password</label>
-                  <a className="text-xs text-secondary hover:underline" href="#">Lupa Password?</a>
+                  <label className="text-xs font-bold text-text-dim uppercase tracking-widest pl-1" htmlFor="password">Password</label>
+                  <button type="button" className="text-xs text-accent hover:text-accent-light transition-all">Lupa Password?</button>
                 </div>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-outline w-5 h-5" />
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-text-dim/50 w-5 h-5" />
                   <input 
-                    className="w-full pl-10 pr-4 py-3 bg-background border border-outline-variant rounded-xl focus:ring-2 focus:ring-secondary outline-none transition-all"
+                    required
+                    className="w-full pl-12 pr-4 py-4 bg-white/[0.03] border border-white/5 rounded-2xl focus:ring-2 focus:ring-accent/50 outline-none transition-all text-white placeholder:text-white/10"
                     id="password"
-                    placeholder="••••••••"
+                    placeholder="password"
                     type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                   />
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
-                <input className="w-4 h-4 text-primary accent-primary rounded cursor-pointer" id="remember" type="checkbox" />
-                <label className="text-xs text-on-surface-variant cursor-pointer select-none" htmlFor="remember">Tetap masuk selama 30 hari</label>
-              </div>
-
-              <button className="w-full py-4 bg-primary text-white font-headline font-bold rounded-xl hover:opacity-90 transition-all flex justify-center items-center gap-2 shadow-lg group">
+              <button 
+                type="submit"
+                className="btn-primary w-full py-5 text-sm uppercase tracking-widest shadow-xl shadow-accent/30"
+              >
                 Masuk ke Portal
-                <LogIn className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                <LogIn className="w-5 h-5 inline-block ml-3 mb-0.5" />
               </button>
             </form>
-
-            <div className="mt-8 pt-6 border-t border-outline-variant/30 text-center">
-              <p className="text-xs text-on-surface-variant">
-                Butuh bantuan akses? <a className="text-secondary font-bold hover:underline" href="#">Hubungi Admin IT</a>
-              </p>
-            </div>
           </motion.div>
 
           {/* Security Assurance */}
-          <div className="mt-8 flex items-center justify-center gap-6 text-outline-variant">
-            <div className="flex items-center gap-1.5">
+          <div className="mt-10 flex items-center justify-center gap-6 text-text-dim/30">
+            <div className="flex items-center gap-2">
               <Verified className="w-4 h-4" />
-              <span className="text-xs font-medium">Enkripsi 256-bit</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider">Enkripsi 256-bit</span>
             </div>
-            <div className="w-1 h-1 bg-outline-variant rounded-full"></div>
-            <div className="flex items-center gap-1.5">
+            <div className="w-1 h-1 bg-white/10 rounded-full"></div>
+            <div className="flex items-center gap-2">
               <ShieldCheck className="w-4 h-4" />
-              <span className="text-xs font-medium">Akses Terjamin</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider">Akses Terjamin</span>
             </div>
           </div>
         </div>
       </div>
 
       {/* Footer */}
-      <footer className="bg-surface-container-lowest border-t border-outline-variant/50 py-8 px-6 md:px-12 relative z-10">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+      <footer className="glass border-t-0 p-10 relative z-10 m-6 rounded-[2rem]">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
           <div className="flex flex-col items-center md:items-start gap-1">
-            <span className="font-headline text-lg font-bold text-primary">Properindo Enviro Tech</span>
-            <p className="text-xs text-on-surface-variant font-medium">© 2024 Properindo Enviro Tech.</p>
+            <span className="font-headline text-lg font-bold text-white">EDA Monitoring System</span>
+            <p className="text-xs text-text-dim font-medium tracking-wide">© 2024 EDA Monitoring System.</p>
           </div>
-          <div className="flex flex-wrap justify-center gap-x-8 gap-y-2">
+          <div className="flex flex-wrap justify-center gap-x-10 gap-y-3">
             {['Privacy Policy', 'Contact Support', 'Global Certifications', 'Sustainability Report'].map(link => (
-              <a key={link} className="text-xs text-on-surface-variant hover:text-primary transition-colors font-medium" href="#">{link}</a>
+              <a key={link} className="text-xs text-text-dim hover:text-accent transition-colors font-semibold uppercase tracking-wider" href="#">{link}</a>
             ))}
           </div>
         </div>
       </footer>
-
-      {/* Decorative background image */}
-      <div className="fixed top-20 right-10 opacity-[0.03] pointer-events-none hidden lg:block select-none">
-        <img src={IMAGES.DECORATIVE_PATTERN} alt="Pattern" className="w-96 h-96 object-contain" />
-      </div>
     </div>
   );
 }
